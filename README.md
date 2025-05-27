@@ -127,6 +127,7 @@ docker login
 A este comando se le deben agregar las credenciales de docker hub o en su defecto utilizar el código generado.
 
 ![1748328615489](image/README/1748328615489.png)
+6. Las pruebas fueron ajustadas para una iteración más corta, por lo que se muestran en warning.
 
 ### Solución ejercicio 3: Despliegue Continuo
 
@@ -136,6 +137,8 @@ A este comando se le deben agregar las credenciales de docker hub o en su defect
 3. Para poder ejecutar el despliegue de manera adecuada se deben cumplir los stages anteriores, en caso de que todo se cumpla el despliegue será exitoso y obtendremos la respuesta adecuada del health check.
 ![1748328719896](image/README/1748328719896.png)
 4. Verificación de despliegue correcto.
+
+![1748330030228](image/README/1748330030228.png)
 
 ### Diagrama de arquitectura del pipeline
 
