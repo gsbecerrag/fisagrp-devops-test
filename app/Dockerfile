@@ -6,15 +6,16 @@ WORKDIR /app
 COPY ./app .
 
 # Make mvnw executable and install dependencies
-RUN ls -l
-RUN chmod +x mvnw
-RUN apt-get update && \
-    apt-get install -y tar curl
-RUN ./mvnw clean package -DskipTests
+RUN chmod +x mvnw && \
+    apt-get update && \
+    apt-get install -y tar curl && \
+    ./mvnw clean package -DskipTests && \
+    ls -l target/
 
 # Runtime stage
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/openjdk/jdk:17-ubuntu
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
+RUN ls -l /app/
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"] 

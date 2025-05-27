@@ -18,11 +18,18 @@ jobs:
             --platform ${{ parameters.platform }} \
             -v $(pwd)/app:/app \
             ${{ parameters.dockerImage }} \
-            /bin/bash -c "cd /app && ./mvnw clean package -DskipTests"
+            /bin/bash -c "cd /app && ls -la && ./mvnw clean package -DskipTests && ls -la target/"
         displayName: 'Build JAR with Docker'
       - script: |
           ls -lh app/target/
         displayName: 'List build artifacts'
       - script: |
-          echo "##vso[task.setvariable variable=JAR_PATH]$(pwd)/app/target/${{ parameters.jarName }}"
+          if [ -f "app/target/${{ parameters.jarName }}" ]; then
+            echo "JAR file found at app/target/${{ parameters.jarName }}"
+            echo "##vso[task.setvariable variable=JAR_PATH]$(pwd)/app/target/${{ parameters.jarName }}"
+          else
+            echo "JAR file not found at app/target/${{ parameters.jarName }}"
+            echo "##vso[task.logissue type=error]JAR file not found"
+            exit 1
+          fi
         displayName: 'Set JAR path variable'
