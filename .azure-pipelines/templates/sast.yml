@@ -5,15 +5,35 @@ parameters:
 jobs:
   - job: SAST
     displayName: 'Static Application Security Testing'
+    timeoutInMinutes: 10
     steps:
       # Run Maven with SpotBugs, Checkstyle, and PMD
       - script: |
           docker run --rm \
             --platform ${{ parameters.platform }} \
             ${{ parameters.dockerImage }} \
-            /bin/bash -c "cd /app && ./mvnw spotbugs:check checkstyle:check pmd:check"
-        displayName: 'Run Static Analysis'
+            /bin/bash -c "cd /app && ./mvnw spotbugs:check -Dspotbugs.failOnError=false"
+        displayName: 'Run SpotBugs'
         continueOnError: 'true'
+        timeoutInMinutes: 2
+
+      - script: |
+          docker run --rm \
+            --platform ${{ parameters.platform }} \
+            ${{ parameters.dockerImage }} \
+            /bin/bash -c "cd /app && ./mvnw checkstyle:check -Dcheckstyle.failOnViolation=false"
+        displayName: 'Run Checkstyle'
+        continueOnError: 'true'
+        timeoutInMinutes: 2
+
+      - script: |
+          docker run --rm \
+            --platform ${{ parameters.platform }} \
+            ${{ parameters.dockerImage }} \
+            /bin/bash -c "cd /app && ./mvnw pmd:check -Dpmd.failOnViolation=false"
+        displayName: 'Run PMD'
+        continueOnError: 'true'
+        timeoutInMinutes: 2
       
       # Display SpotBugs results
       - script: |

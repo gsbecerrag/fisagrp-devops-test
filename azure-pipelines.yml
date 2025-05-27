@@ -3,7 +3,7 @@ trigger:
 
 variables:
   - name: DOCKER_IMAGE
-    value: 'spring-boot-builder:latest'
+    value: 'fisagrp-builder:0.0.1'
   - name: DOCKER_PLATFORM
     value: 'linux/amd64'
 
