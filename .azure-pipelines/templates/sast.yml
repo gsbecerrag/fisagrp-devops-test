@@ -1,9 +1,15 @@
+parameters:
+  - name: dockerImage
+    type: string
+  - name: platform
+    type: string
+
 jobs:
   - job: SAST
     displayName: Static Code Analysis
     steps:
       - script: |
-          docker run --rm -v $(pwd):/app --workdir /app mcr.microsoft.com/openjdk/jdk:17-ubuntu bash -c "apt-get update && apt-get install -y tar curl && ./mvnw verify -DskipTests"
+          docker run --rm --platform ${{ parameters.platform }} -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl && ./mvnw verify -DskipTests"
         displayName: 'Run Maven Verify (SAST)'
       - script: |
           echo "##vso[task.setvariable variable=SAST_STATUS]success"
