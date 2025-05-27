@@ -12,25 +12,27 @@ pool:
 
 stages:
   - stage: Build
-    displayName: Build and Test
+    displayName: Build
     jobs:
-      - job: BuildAndTest
-        displayName: Build and Test
+      - job: Build
+        displayName: Build
         steps:
           - script: |
               docker build -t $(DOCKER_IMAGE) --platform $(DOCKER_PLATFORM) -f app/Dockerfile .
             displayName: 'Build Docker Image'
-          - script: |
-              docker run --rm \
-                --platform $(DOCKER_PLATFORM) \
-                $(DOCKER_IMAGE) \
-                /bin/bash -c "cd /app && ./mvnw spotbugs:check checkstyle:check pmd:check"
-            displayName: 'Run Static Analysis'
-            continueOnError: 'true'
+
+  - stage: SAST
+    displayName: Static Analysis
+    dependsOn: Build
+    jobs:
+      - template: .azure-pipelines/templates/sast.yml
+        parameters:
+          dockerImage: $(DOCKER_IMAGE)
+          platform: $(DOCKER_PLATFORM)
 
   - stage: Release
     displayName: Release Stage
-    dependsOn: Build
+    dependsOn: SAST
     jobs:
       - template: .azure-pipelines/templates/release.yml
         parameters:
