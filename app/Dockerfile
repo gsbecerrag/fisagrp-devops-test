@@ -8,8 +8,8 @@ COPY . .
 # Make mvnw executable and install dependencies
 RUN chmod +x mvnw && \
     apt-get update && \
-    apt-get install -y tar curl && \
-    ./mvnw clean package -DskipTests
+    apt-get install -y tar curl
+RUN ./mvnw clean package -DskipTests
 
 # Runtime stage
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/openjdk/jdk:17-ubuntu
