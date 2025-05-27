@@ -119,3 +119,14 @@ Configurando el uso de nuestro Dockerfile dentro del pipeline para cumplir con e
 4. Por motivos de configuración de facturación se realiza la integración de un agente de Azure self hosted para no tener dependencias de parelelismo.
 ![1748321056947](image/README/1748321056947.png)
 5. 
+
+
+### Solución ejercicio 3: Despliegue Continuo
+
+1. Para replicar los objetivos del ejercicio en una modalidad sin dependencia de nubes, se crea un service connection dentro de Azure DevOps para utilizar un servidor local como target.
+![1748326759715](image/README/1748326759715.png)
+2. Por medio del uso del service connection se configura el despliegue hacia el servidor local.
+
+### Diagrama de arquitectura del pipeline
+
+![1748327256583](image/README/1748327256583.png)

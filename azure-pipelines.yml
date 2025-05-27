@@ -6,10 +6,12 @@ variables:
     value: 'fisagrp-builder:0.0.1'
   - name: DOCKER_PLATFORM
     value: 'linux/amd64'
-  - name: APP_SERVICE_NAME
-    value: 'fisagrp-demo'
-  - name: RESOURCE_GROUP
-    value: 'fisagrp-rg'
+  - name: SERVER_HOST
+    value: 'your-server-ip'
+  - name: SERVER_USER
+    value: 'your-ssh-user'
+  - name: APP_PORT
+    value: '8080'
 
 pool:
   name: 'Default'
@@ -46,14 +48,9 @@ stages:
     displayName: Deploy Stage
     dependsOn: Release
     jobs:
-      - job: Deploy
-        displayName: 'Deploy to Azure'
-        steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'AzureServiceConnection'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                az webapp deploy --resource-group $(RESOURCE_GROUP) --name $(APP_SERVICE_NAME) --src-path $(Build.ArtifactStagingDirectory)/demo-0.0.1-SNAPSHOT.jar --type jar
-            displayName: 'Deploy to Azure App Service'
+      - template: .azure-pipelines/templates/deploy.yml
+        parameters:
+          serverHost: $(SERVER_HOST)
+          serverUser: $(SERVER_USER)
+          jarName: 'demo-0.0.1-SNAPSHOT.jar'
+          appPort: $(APP_PORT)

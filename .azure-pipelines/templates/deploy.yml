@@ -1,14 +1,20 @@
 parameters:
-  - name: appServiceName
+  - name: serverHost
     type: string
-  - name: resourceGroup
+  - name: serverUser
     type: string
   - name: jarName
     type: string
+  - name: appPort
+    type: string
+    default: '8080'
+  - name: appName
+    type: string
+    default: 'demo'
 
 jobs:
   - job: Deploy
-    displayName: 'Deploy to Azure App Service'
+    displayName: 'Deploy to Home Server'
     steps:
       # Download the artifact
       - script: |
@@ -18,25 +24,48 @@ jobs:
 
       # Backup current deployment
       - script: |
-          az webapp deployment list --name ${{ parameters.appServiceName }} --resource-group ${{ parameters.resourceGroup }} --query "[?status=='Success'].name" -o tsv | head -n 1 > current_deployment.txt
-          if [ -s current_deployment.txt ]; then
-            echo "Backing up current deployment: $(cat current_deployment.txt)"
-            az webapp deployment backup create --name ${{ parameters.appServiceName }} --resource-group ${{ parameters.resourceGroup }} --backup-name "backup-$(date +%Y%m%d-%H%M%S)"
-          fi
+          ssh ${{ parameters.serverUser }}@${{ parameters.serverHost }} '
+            if [ -f /opt/${{ parameters.appName }}/${{ parameters.jarName }} ]; then
+              echo "Backing up current deployment..."
+              cp /opt/${{ parameters.appName }}/${{ parameters.jarName }} /opt/${{ parameters.appName }}/backup/${{ parameters.jarName }}.$(date +%Y%m%d-%H%M%S)
+            fi
+          '
         displayName: 'Backup Current Deployment'
         continueOnError: 'true'
 
       # Deploy the new version
       - script: |
-          az webapp deploy --resource-group ${{ parameters.resourceGroup }} --name ${{ parameters.appServiceName }} --src-path $(Build.ArtifactStagingDirectory)/${{ parameters.jarName }} --type jar
-        displayName: 'Deploy JAR'
+          # Create app directory if it doesn't exist
+          ssh ${{ parameters.serverUser }}@${{ parameters.serverHost }} '
+            mkdir -p /opt/${{ parameters.appName }}/backup
+          '
+          
+          # Copy the new JAR
+          scp $(Build.ArtifactStagingDirectory)/${{ parameters.jarName }} ${{ parameters.serverUser }}@${{ parameters.serverHost }}:/opt/${{ parameters.appName }}/
+          
+          # Stop current process, start new one
+          ssh ${{ parameters.serverUser }}@${{ parameters.serverHost }} '
+            # Find and stop the current Java process
+            pid=$(pgrep -f "${{ parameters.appName }}")
+            if [ ! -z "$pid" ]; then
+              echo "Stopping current process $pid"
+              kill $pid
+              sleep 5
+            fi
+            
+            # Start the new version
+            echo "Starting new version..."
+            cd /opt/${{ parameters.appName }}
+            nohup java -jar ${{ parameters.jarName }} --server.port=${{ parameters.appPort }} > app.log 2>&1 &
+          '
+        displayName: 'Deploy and Restart Application'
 
       # Health check
       - script: |
           echo "Waiting for application to start..."
           sleep 30
           for i in {1..5}; do
-            if curl -f https://${{ parameters.appServiceName }}.azurewebsites.net/actuator/health; then
+            if curl -f http://${{ parameters.serverHost }}:${{ parameters.appPort }}/actuator/health; then
               echo "Application is healthy!"
               exit 0
             fi
