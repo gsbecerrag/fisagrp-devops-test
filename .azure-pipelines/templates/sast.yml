@@ -9,7 +9,8 @@ jobs:
     displayName: Static Code Analysis
     steps:
       - script: |
-          docker run --rm --platform ${{ parameters.platform }} -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl && ./mvnw verify -DskipTests"
+          chmod +x ./mvnw
+          docker run --rm --platform ${{ parameters.platform }} -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl && chmod +x /app/mvnw && /app/mvnw verify -DskipTests"
         displayName: 'Run Maven Verify (SAST)'
       - script: |
           echo "##vso[task.setvariable variable=SAST_STATUS]success"

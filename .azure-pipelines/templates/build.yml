@@ -11,7 +11,8 @@ jobs:
     displayName: Build with Docker
     steps:
       - script: |
-          docker run --rm --platform ${{ parameters.platform }} -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl && ./mvnw clean package -DskipTests"
+          chmod +x ./mvnw
+          docker run --rm --platform ${{ parameters.platform }} -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl && chmod +x /app/mvnw && /app/mvnw clean package -DskipTests"
         displayName: 'Build JAR with Docker'
       - script: |
           ls -lh target/
