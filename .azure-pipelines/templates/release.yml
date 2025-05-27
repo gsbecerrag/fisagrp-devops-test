@@ -8,7 +8,7 @@ jobs:
     steps:
       - script: |
           mkdir -p $(Build.ArtifactStagingDirectory)
-          cp target/${{ parameters.jarName }} $(Build.ArtifactStagingDirectory)/
+          cp app/target/${{ parameters.jarName }} $(Build.ArtifactStagingDirectory)/
         displayName: 'Copy JAR to staging'
       - script: |
           echo "##vso[artifact.upload artifactname=drop]$(Build.ArtifactStagingDirectory)/${{ parameters.jarName }}"
