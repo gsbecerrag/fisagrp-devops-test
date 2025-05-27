@@ -11,12 +11,12 @@ jobs:
     displayName: Build with Docker
     steps:
       - script: |
-          ls -l $(pwd)/app
+          ls -l app/
       - script: |
           docker run --rm --platform ${{ parameters.platform }} -v $(pwd)/app:/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl maven && mvn clean package -DskipTests"
         displayName: 'Build JAR with Docker'
       - script: |
-          ls -lh target/
+          ls -lh app/target/
         displayName: 'List build artifacts'
       - script: |
           echo "##vso[task.setvariable variable=JAR_PATH]$(pwd)/app/target/${{ parameters.jarName }}"
