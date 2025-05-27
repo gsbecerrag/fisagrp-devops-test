@@ -14,7 +14,11 @@ jobs:
           ls -l app/
         displayName: 'List app directory'
       - script: |
-          docker run --rm --platform ${{ parameters.platform }} -v $(pwd)/app:/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl maven && mvn clean package -DskipTests"
+          docker run --rm \
+            --platform ${{ parameters.platform }} \
+            -v $(pwd)/app:/app \
+            ${{ parameters.dockerImage }} \
+            /bin/bash -c "cd /app && ./mvnw clean package -DskipTests"
         displayName: 'Build JAR with Docker'
       - script: |
           ls -lh app/target/

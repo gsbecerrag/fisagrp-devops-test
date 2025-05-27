@@ -3,7 +3,7 @@ trigger:
 
 variables:
   - name: DOCKER_IMAGE
-    value: 'mcr.microsoft.com/openjdk/jdk:17-ubuntu'
+    value: 'spring-boot-builder:latest'
   - name: JAR_NAME
     value: 'demo-0.0.1-SNAPSHOT.jar'
   - name: DOCKER_PLATFORM
@@ -13,8 +13,19 @@ pool:
   name: 'Default'
 
 stages:
+  - stage: BuildImage
+    displayName: Build Docker Image
+    jobs:
+      - job: BuildDockerImage
+        displayName: Build Docker Image
+        steps:
+          - script: |
+              docker build -t $(DOCKER_IMAGE) --platform $(DOCKER_PLATFORM) -f app/Dockerfile .
+            displayName: 'Build Docker Image'
+
   - stage: Build
     displayName: Build Stage
+    dependsOn: BuildImage
     jobs:
       - template: .azure-pipelines/templates/build.yml
         parameters:
