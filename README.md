@@ -102,3 +102,6 @@ Condiciones:
 
 
 ### Solución Ejercicio 2: Diseño del Pipeline CI/CD Modular en Azure DevOps
+
+![1748315881872](image/README/1748315881872.png)
+![1748315901963](image/README/1748315901963.png)

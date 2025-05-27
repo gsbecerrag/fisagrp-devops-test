@@ -5,6 +5,10 @@ jobs:
       vmImage: 'ubuntu-latest'
     steps:
       - script: |
-          ./mvnw verify -DskipTests
+          docker run --rm -v $(pwd):/app --workdir /app mcr.microsoft.com/openjdk/jdk:17-ubuntu bash -c "apt-get update && apt-get install -y tar curl && ./mvnw verify -DskipTests"
         displayName: 'Run Maven Verify (SAST)'
+      - script: |
+          echo "##vso[task.setvariable variable=SAST_STATUS]success"
+        displayName: 'Set SAST status'
+        condition: succeeded()
       # Optionally, add a tool like SpotBugs or Checkstyle here
