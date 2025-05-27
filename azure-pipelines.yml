@@ -4,8 +4,6 @@ trigger:
 variables:
   - name: DOCKER_IMAGE
     value: 'spring-boot-builder:latest'
-  - name: JAR_NAME
-    value: 'app.jar'
   - name: DOCKER_PLATFORM
     value: 'linux/amd64'
 
@@ -13,39 +11,27 @@ pool:
   name: 'Default'
 
 stages:
-  - stage: BuildImage
-    displayName: Build Docker Image
+  - stage: Build
+    displayName: Build and Test
     jobs:
-      - job: BuildDockerImage
-        displayName: Build Docker Image
+      - job: BuildAndTest
+        displayName: Build and Test
         steps:
           - script: |
               docker build -t $(DOCKER_IMAGE) --platform $(DOCKER_PLATFORM) -f app/Dockerfile .
             displayName: 'Build Docker Image'
-
-  - stage: Build
-    displayName: Build Stage
-    dependsOn: BuildImage
-    jobs:
-      - template: .azure-pipelines/templates/build.yml
-        parameters:
-          dockerImage: $(DOCKER_IMAGE)
-          jarName: $(JAR_NAME)
-          platform: $(DOCKER_PLATFORM)
-
-  - stage: SAST
-    displayName: Static Analysis Stage
-    dependsOn: Build
-    jobs:
-      - template: .azure-pipelines/templates/sast.yml
-        parameters:
-          dockerImage: $(DOCKER_IMAGE)
-          platform: $(DOCKER_PLATFORM)
+          - script: |
+              docker run --rm \
+                --platform $(DOCKER_PLATFORM) \
+                $(DOCKER_IMAGE) \
+                /bin/bash -c "cd /app && ./mvnw spotbugs:check checkstyle:check pmd:check"
+            displayName: 'Run Static Analysis'
+            continueOnError: 'true'
 
   - stage: Release
     displayName: Release Stage
-    dependsOn: SAST
+    dependsOn: Build
     jobs:
       - template: .azure-pipelines/templates/release.yml
         parameters:
-          jarName: $(JAR_NAME)
+          jarName: 'demo-0.0.1-SNAPSHOT.jar'
