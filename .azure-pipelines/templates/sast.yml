@@ -1,8 +1,6 @@
 jobs:
   - job: SAST
     displayName: Static Code Analysis
-    pool:
-      vmImage: 'ubuntu-latest'
     steps:
       - script: |
           docker run --rm -v $(pwd):/app --workdir /app mcr.microsoft.com/openjdk/jdk:17-ubuntu bash -c "apt-get update && apt-get install -y tar curl && ./mvnw verify -DskipTests"
