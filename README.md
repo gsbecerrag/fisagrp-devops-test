@@ -135,6 +135,7 @@ A este comando se le deben agregar las credenciales de docker hub o en su defect
 2. Por medio del uso del service connection se configura el despliegue hacia el servidor local.
 3. Para poder ejecutar el despliegue de manera adecuada se deben cumplir los stages anteriores, en caso de que todo se cumpla el despliegue será exitoso y obtendremos la respuesta adecuada del health check.
 ![1748328719896](image/README/1748328719896.png)
+4. Verificación de despliegue correcto.
 
 ### Diagrama de arquitectura del pipeline
 
