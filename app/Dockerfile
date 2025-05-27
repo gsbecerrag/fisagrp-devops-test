@@ -3,7 +3,7 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/openjdk/jdk:17-ubuntu AS builde
 WORKDIR /app
 
 # Copy only the necessary files for building
-COPY . .
+COPY ./app .
 
 # Make mvnw executable and install dependencies
 RUN ls -l
