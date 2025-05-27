@@ -3,13 +3,15 @@ parameters:
     type: string
   - name: jarName
     type: string
+  - name: platform
+    type: string
 
 jobs:
   - job: Build
     displayName: Build with Docker
     steps:
       - script: |
-          docker run --rm -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl && ./mvnw clean package -DskipTests"
+          docker run --rm --platform ${{ parameters.platform }} -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl && ./mvnw clean package -DskipTests"
         displayName: 'Build JAR with Docker'
       - script: |
           ls -lh target/

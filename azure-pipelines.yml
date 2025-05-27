@@ -1,6 +1,14 @@
 trigger:
   - main
 
+variables:
+  - name: DOCKER_IMAGE
+    value: 'mcr.microsoft.com/openjdk/jdk:17-ubuntu'
+  - name: JAR_NAME
+    value: 'demo-0.0.1-SNAPSHOT.jar'
+  - name: DOCKER_PLATFORM
+    value: 'linux/amd64'
+
 pool:
   name: 'Default'
 
@@ -10,14 +18,18 @@ stages:
     jobs:
       - template: .azure-pipelines/templates/build.yml
         parameters:
-          dockerImage: 'mcr.microsoft.com/openjdk/jdk:17-ubuntu'
-          jarName: 'demo-0.0.1-SNAPSHOT.jar'
+          dockerImage: $(DOCKER_IMAGE)
+          jarName: $(JAR_NAME)
+          platform: $(DOCKER_PLATFORM)
 
   - stage: SAST
     displayName: Static Analysis Stage
     dependsOn: Build
     jobs:
       - template: .azure-pipelines/templates/sast.yml
+        parameters:
+          dockerImage: $(DOCKER_IMAGE)
+          platform: $(DOCKER_PLATFORM)
 
   - stage: Release
     displayName: Release Stage
@@ -25,4 +37,4 @@ stages:
     jobs:
       - template: .azure-pipelines/templates/release.yml
         parameters:
-          jarName: 'demo-0.0.1-SNAPSHOT.jar'
+          jarName: $(JAR_NAME)
