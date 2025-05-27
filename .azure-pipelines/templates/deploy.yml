@@ -3,7 +3,7 @@ parameters:
     type: string
   - name: serverUser
     type: string
-  - name: jarName
+  - name: dockerImage
     type: string
   - name: appPort
     type: string
@@ -16,18 +16,14 @@ jobs:
   - job: Deploy
     displayName: 'Deploy to Home Server'
     steps:
-      # Download the artifact
-      - script: |
-          mkdir -p $(Build.ArtifactStagingDirectory)
-          cp app/target/${{ parameters.jarName }} $(Build.ArtifactStagingDirectory)/
-        displayName: 'Download Artifact'
-
       # Backup current deployment
       - script: |
           ssh ${{ parameters.serverUser }}@${{ parameters.serverHost }} '
-            if [ -f /opt/${{ parameters.appName }}/${{ parameters.jarName }} ]; then
+            # Get current container ID if running
+            current_container=$(docker ps -q --filter name=${{ parameters.appName }})
+            if [ ! -z "$current_container" ]; then
               echo "Backing up current deployment..."
-              cp /opt/${{ parameters.appName }}/${{ parameters.jarName }} /opt/${{ parameters.appName }}/backup/${{ parameters.jarName }}.$(date +%Y%m%d-%H%M%S)
+              docker commit $current_container ${{ parameters.appName }}:backup-$(date +%Y%m%d-%H%M%S)
             fi
           '
         displayName: 'Backup Current Deployment'
@@ -35,30 +31,28 @@ jobs:
 
       # Deploy the new version
       - script: |
-          # Create app directory if it doesn't exist
           ssh ${{ parameters.serverUser }}@${{ parameters.serverHost }} '
-            mkdir -p /opt/${{ parameters.appName }}/backup
-          '
-          
-          # Copy the new JAR
-          scp $(Build.ArtifactStagingDirectory)/${{ parameters.jarName }} ${{ parameters.serverUser }}@${{ parameters.serverHost }}:/opt/${{ parameters.appName }}/
-          
-          # Stop current process, start new one
-          ssh ${{ parameters.serverUser }}@${{ parameters.serverHost }} '
-            # Find and stop the current Java process
-            pid=$(pgrep -f "${{ parameters.appName }}")
-            if [ ! -z "$pid" ]; then
-              echo "Stopping current process $pid"
-              kill $pid
-              sleep 5
+            # Pull the new image
+            echo "Pulling new image..."
+            docker pull ${{ parameters.dockerImage }}
+            
+            # Stop and remove current container if running
+            current_container=$(docker ps -q --filter name=${{ parameters.appName }})
+            if [ ! -z "$current_container" ]; then
+              echo "Stopping current container..."
+              docker stop $current_container
+              docker rm $current_container
             fi
             
-            # Start the new version
-            echo "Starting new version..."
-            cd /opt/${{ parameters.appName }}
-            nohup java -jar ${{ parameters.jarName }} --server.port=${{ parameters.appPort }} > app.log 2>&1 &
+            # Start new container
+            echo "Starting new container..."
+            docker run -d \
+              --name ${{ parameters.appName }} \
+              -p ${{ parameters.appPort }}:8080 \
+              --restart unless-stopped \
+              ${{ parameters.dockerImage }}
           '
-        displayName: 'Deploy and Restart Application'
+        displayName: 'Deploy and Restart Container'
 
       # Health check
       - script: |
