@@ -1,0 +1,48 @@
+parameters:
+  - name: appServiceName
+    type: string
+  - name: resourceGroup
+    type: string
+  - name: jarName
+    type: string
+
+jobs:
+  - job: Deploy
+    displayName: 'Deploy to Azure App Service'
+    steps:
+      # Download the artifact
+      - script: |
+          mkdir -p $(Build.ArtifactStagingDirectory)
+          cp app/target/${{ parameters.jarName }} $(Build.ArtifactStagingDirectory)/
+        displayName: 'Download Artifact'
+
+      # Backup current deployment
+      - script: |
+          az webapp deployment list --name ${{ parameters.appServiceName }} --resource-group ${{ parameters.resourceGroup }} --query "[?status=='Success'].name" -o tsv | head -n 1 > current_deployment.txt
+          if [ -s current_deployment.txt ]; then
+            echo "Backing up current deployment: $(cat current_deployment.txt)"
+            az webapp deployment backup create --name ${{ parameters.appServiceName }} --resource-group ${{ parameters.resourceGroup }} --backup-name "backup-$(date +%Y%m%d-%H%M%S)"
+          fi
+        displayName: 'Backup Current Deployment'
+        continueOnError: 'true'
+
+      # Deploy the new version
+      - script: |
+          az webapp deploy --resource-group ${{ parameters.resourceGroup }} --name ${{ parameters.appServiceName }} --src-path $(Build.ArtifactStagingDirectory)/${{ parameters.jarName }} --type jar
+        displayName: 'Deploy JAR'
+
+      # Health check
+      - script: |
+          echo "Waiting for application to start..."
+          sleep 30
+          for i in {1..5}; do
+            if curl -f https://${{ parameters.appServiceName }}.azurewebsites.net/actuator/health; then
+              echo "Application is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i: Application not ready yet, waiting..."
+            sleep 10
+          done
+          echo "Health check failed after 5 attempts"
+          exit 1
+        displayName: 'Health Check' 
