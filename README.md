@@ -111,7 +111,11 @@ azure-pipelines.yml                # Main pipeline entrypoint
   │     ├── sast.yml               # SAST stage template
   │     └── release.yml            # Release stage template
   └── variables.yml                # Centralized variables (optional)
- 
-
+Configurando el uso de nuestro Dockerfile dentro del pipeline para cumplir con el ejercicio.
+2. Es necesario el vincular Azure DevOps con nuestro repositorio de GitHub para seleccionar le YAML creado y sus trigers
 ![1748315881872](image/README/1748315881872.png)
 ![1748315901963](image/README/1748315901963.png)
+3. La configuraci[on del pipleine consdiera la ejecuci[on autom[atica del mismo al registrar un cambio en la branch "main"
+4. Por motivos de configuración de facturación se realiza la integración de un agente de Azure self hosted para no tener dependencias de parelelismo.
+![1748321056947](image/README/1748321056947.png)
+5. 

@@ -1,8 +1,17 @@
 # Build stage
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/openjdk/jdk:17-ubuntu AS builder
 WORKDIR /app
-COPY . .
-RUN apt-get update && apt-get install -y tar curl && ./mvnw clean package -DskipTests
+
+# Copy only the necessary files for building
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+COPY src/ ./src/
+
+# Make mvnw executable and install dependencies
+RUN chmod +x mvnw && \
+    apt-get update && \
+    apt-get install -y tar curl && \
+    ./mvnw clean package -DskipTests
 
 # Runtime stage
 FROM --platform=$TARGETPLATFORM mcr.microsoft.com/openjdk/jdk:17-ubuntu
