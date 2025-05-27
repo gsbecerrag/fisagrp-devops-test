@@ -2,27 +2,27 @@ trigger:
   - main
 
 pool:
-  vmImage: 'ubuntu-20.04'
+  name: 'Default'
 
-jobs:
-  - job: BuildAndTest
-    displayName: 'Build, Test and Release'
-    steps:
-      # Build Stage
-      - script: |
-          docker run --rm -v $(pwd):/app --workdir /app mcr.microsoft.com/openjdk/jdk:17-ubuntu bash -c "apt-get update && apt-get install -y tar curl && ./mvnw clean package -DskipTests"
-        displayName: 'Build JAR with Docker'
-      
-      # SAST Stage
-      - script: |
-          docker run --rm -v $(pwd):/app --workdir /app mcr.microsoft.com/openjdk/jdk:17-ubuntu bash -c "apt-get update && apt-get install -y tar curl && ./mvnw verify -DskipTests"
-        displayName: 'Run Maven Verify (SAST)'
-      
-      # Release Stage
-      - script: |
-          mkdir -p $(Build.ArtifactStagingDirectory)
-          cp target/demo-0.0.1-SNAPSHOT.jar $(Build.ArtifactStagingDirectory)/
-        displayName: 'Copy JAR to staging'
-      - script: |
-          echo "##vso[artifact.upload artifactname=drop]$(Build.ArtifactStagingDirectory)/demo-0.0.1-SNAPSHOT.jar"
-        displayName: 'Publish Artifact'
+stages:
+  - stage: Build
+    displayName: Build Stage
+    jobs:
+      - template: .azure-pipelines/templates/build.yml
+        parameters:
+          dockerImage: 'mcr.microsoft.com/openjdk/jdk:17-ubuntu'
+          jarName: 'demo-0.0.1-SNAPSHOT.jar'
+
+  - stage: SAST
+    displayName: Static Analysis Stage
+    dependsOn: Build
+    jobs:
+      - template: .azure-pipelines/templates/sast.yml
+
+  - stage: Release
+    displayName: Release Stage
+    dependsOn: SAST
+    jobs:
+      - template: .azure-pipelines/templates/release.yml
+        parameters:
+          jarName: 'demo-0.0.1-SNAPSHOT.jar'
