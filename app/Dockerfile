@@ -6,8 +6,8 @@ WORKDIR /app
 COPY . .
 
 # Make mvnw executable and install dependencies
-RUN chmod +x mvnw && \
-    apt-get update && \
+RUN chmod +x mvnw
+RUN apt-get update && \
     apt-get install -y tar curl
 RUN ./mvnw clean package -DskipTests
 
