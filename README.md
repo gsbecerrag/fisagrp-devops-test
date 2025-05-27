@@ -129,4 +129,4 @@ Configurando el uso de nuestro Dockerfile dentro del pipeline para cumplir con e
 
 ### Diagrama de arquitectura del pipeline
 
-![1748327256583](image/README/1748327256583.png)
+![1748328039542](image/README/1748328039542.png)
