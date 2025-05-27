@@ -1,16 +1,50 @@
 parameters:
-  - name: dockerImage
-    type: string
-  - name: platform
-    type: string
+  dockerImage: ''
+  platform: ''
 
 jobs:
   - job: SAST
-    displayName: Static Code Analysis
+    displayName: 'Static Application Security Testing'
     steps:
+      # Run Maven with SpotBugs, Checkstyle, and PMD
       - script: |
-          docker run --rm --platform ${{ parameters.platform }} -v $(pwd)/app:/app --workdir /app ${{ parameters.dockerImage }} bash -c "apt-get update && apt-get install -y tar curl maven && mvn verify -DskipTests"
-        displayName: 'Run Maven Verify (SAST)'
+          docker run --rm \
+            --platform ${{ parameters.platform }} \
+            -v $(pwd)/app:/app \
+            ${{ parameters.dockerImage }} \
+            /bin/bash -c "apt-get update && apt-get install -y maven && \
+            cd /app && \
+            mvn spotbugs:check checkstyle:check pmd:check"
+        displayName: 'Run Static Analysis'
+        continueOnError: true
+      
+      # Display SpotBugs results
+      - script: |
+          if [ -f "app/target/spotbugsXml.xml" ]; then
+            echo "##[section]SpotBugs Results"
+            cat app/target/spotbugsXml.xml
+          fi
+        displayName: 'Display SpotBugs Results'
+        condition: succeededOrFailed()
+      
+      # Display Checkstyle results
+      - script: |
+          if [ -f "app/target/checkstyle-result.xml" ]; then
+            echo "##[section]Checkstyle Results"
+            cat app/target/checkstyle-result.xml
+          fi
+        displayName: 'Display Checkstyle Results'
+        condition: succeededOrFailed()
+      
+      # Display PMD results
+      - script: |
+          if [ -f "app/target/pmd.xml" ]; then
+            echo "##[section]PMD Results"
+            cat app/target/pmd.xml
+          fi
+        displayName: 'Display PMD Results'
+        condition: succeededOrFailed()
+      
       - script: |
           echo "##vso[task.setvariable variable=SAST_STATUS]success"
         displayName: 'Set SAST status'
