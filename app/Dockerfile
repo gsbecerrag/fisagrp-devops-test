@@ -3,9 +3,7 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/openjdk/jdk:17-ubuntu AS builde
 WORKDIR /app
 
 # Copy only the necessary files for building
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-COPY src/ ./src/
+COPY . .
 
 # Make mvnw executable and install dependencies
 RUN chmod +x mvnw && \
