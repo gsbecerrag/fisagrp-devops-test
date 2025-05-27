@@ -10,11 +10,10 @@ jobs:
       - script: |
           docker run --rm \
             --platform ${{ parameters.platform }} \
-            -v $(pwd)/app:/app \
             ${{ parameters.dockerImage }} \
             /bin/bash -c "cd /app && ./mvnw spotbugs:check checkstyle:check pmd:check"
         displayName: 'Run Static Analysis'
-        continueOnError: true
+        continueOnError: 'true'
       
       # Display SpotBugs results
       - script: |
