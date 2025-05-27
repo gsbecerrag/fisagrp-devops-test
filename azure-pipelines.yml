@@ -5,7 +5,7 @@ variables:
   - name: DOCKER_IMAGE
     value: 'spring-boot-builder:latest'
   - name: JAR_NAME
-    value: 'demo-0.0.1-SNAPSHOT.jar'
+    value: 'app.jar'
   - name: DOCKER_PLATFORM
     value: 'linux/amd64'
 
