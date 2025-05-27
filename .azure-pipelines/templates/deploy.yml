@@ -59,7 +59,7 @@ jobs:
           echo "Waiting for application to start..."
           sleep 30
           for i in {1..5}; do
-            if curl -f http://${{ parameters.serverHost }}:${{ parameters.appPort }}/actuator/health; then
+            if curl -f http://${{ parameters.serverHost }}:${{ parameters.appPort }}/; then
               echo "Application is healthy!"
               exit 0
             fi

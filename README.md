@@ -118,14 +118,23 @@ Configurando el uso de nuestro Dockerfile dentro del pipeline para cumplir con e
 3. La configuraci[on del pipleine consdiera la ejecuci[on autom[atica del mismo al registrar un cambio en la branch "main"
 4. Por motivos de configuración de facturación se realiza la integración de un agente de Azure self hosted para no tener dependencias de parelelismo.
 ![1748321056947](image/README/1748321056947.png)
-5. 
+5. Como dependencias previas al utilizar docker hub debemos configurar nuestro agente para que pueda conectar de manera correcta con el servicio.
 
+```bash
+docker login
+```
+
+A este comando se le deben agregar las credenciales de docker hub o en su defecto utilizar el código generado.
+
+![1748328615489](image/README/1748328615489.png)
 
 ### Solución ejercicio 3: Despliegue Continuo
 
 1. Para replicar los objetivos del ejercicio en una modalidad sin dependencia de nubes, se crea un service connection dentro de Azure DevOps para utilizar un servidor local como target.
 ![1748326759715](image/README/1748326759715.png)
 2. Por medio del uso del service connection se configura el despliegue hacia el servidor local.
+3. Para poder ejecutar el despliegue de manera adecuada se deben cumplir los stages anteriores, en caso de que todo se cumpla el despliegue será exitoso y obtendremos la respuesta adecuada del health check.
+![1748328719896](image/README/1748328719896.png)
 
 ### Diagrama de arquitectura del pipeline
 
