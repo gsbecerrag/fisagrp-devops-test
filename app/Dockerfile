@@ -6,6 +6,7 @@ WORKDIR /app
 COPY . .
 
 # Make mvnw executable and install dependencies
+RUN ls -l
 RUN chmod +x mvnw
 RUN apt-get update && \
     apt-get install -y tar curl
