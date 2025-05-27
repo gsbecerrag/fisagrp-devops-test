@@ -7,8 +7,11 @@ jobs:
     displayName: Publish Artifact
     steps:
       - script: |
+          ls -l /app/target/
+        displayName: 'List target directory'
+      - script: |
           mkdir -p $(Build.ArtifactStagingDirectory)
-          cp app/target/${{ parameters.jarName }} $(Build.ArtifactStagingDirectory)/
+          cp /app/target/${{ parameters.jarName }} $(Build.ArtifactStagingDirectory)/
         displayName: 'Copy JAR to staging'
       - script: |
           echo "##vso[artifact.upload artifactname=drop]$(Build.ArtifactStagingDirectory)/${{ parameters.jarName }}"

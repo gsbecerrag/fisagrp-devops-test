@@ -15,7 +15,7 @@ jobs:
             /bin/bash -c "cd /app && ./mvnw spotbugs:check -Dspotbugs.failOnError=false"
         displayName: 'Run SpotBugs'
         continueOnError: 'true'
-        timeoutInMinutes: 2
+        timeoutInMinutes: 1
 
       - script: |
           docker run --rm \
@@ -24,7 +24,7 @@ jobs:
             /bin/bash -c "cd /app && ./mvnw checkstyle:check -Dcheckstyle.failOnViolation=false"
         displayName: 'Run Checkstyle'
         continueOnError: 'true'
-        timeoutInMinutes: 2
+        timeoutInMinutes: 1
 
       - script: |
           docker run --rm \
@@ -33,7 +33,7 @@ jobs:
             /bin/bash -c "cd /app && ./mvnw pmd:check -Dpmd.failOnViolation=false"
         displayName: 'Run PMD'
         continueOnError: 'true'
-        timeoutInMinutes: 2
+        timeoutInMinutes: 1
       
       # Display SpotBugs results
       - script: |
