@@ -1,0 +1,18 @@
+parameters:
+  - name: dockerImage
+    type: string
+  - name: jarName
+    type: string
+
+jobs:
+  - job: Build
+    displayName: Build with Docker
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - script: |
+          docker run --rm -v $(pwd):/app --workdir /app ${{ parameters.dockerImage }} bash -c "./mvnw clean package -DskipTests"
+        displayName: 'Build JAR with Docker'
+      - script: |
+          ls -lh target/
+        displayName: 'List build artifacts'

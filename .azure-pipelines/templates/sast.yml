@@ -1,0 +1,10 @@
+jobs:
+  - job: SAST
+    displayName: Static Code Analysis
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - script: |
+          ./mvnw verify -DskipTests
+        displayName: 'Run Maven Verify (SAST)'
+      # Optionally, add a tool like SpotBugs or Checkstyle here

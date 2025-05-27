@@ -1,0 +1,17 @@
+parameters:
+  - name: jarName
+    type: string
+
+jobs:
+  - job: Release
+    displayName: Publish Artifact
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - script: |
+          mkdir -p $(Build.ArtifactStagingDirectory)
+          cp target/${{ parameters.jarName }} $(Build.ArtifactStagingDirectory)/
+        displayName: 'Copy JAR to staging'
+      - script: |
+          echo "##vso[artifact.upload artifactname=drop]$(Build.ArtifactStagingDirectory)/${{ parameters.jarName }}"
+        displayName: 'Publish Artifact'

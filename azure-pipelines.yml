@@ -1,0 +1,25 @@
+trigger:
+  - main
+
+stages:
+  - stage: Build
+    displayName: Build Stage
+    jobs:
+      - template: templates/build.yml
+        parameters:
+          dockerImage: 'mcr.microsoft.com/openjdk/jdk:17-ubuntu'
+          jarName: 'demo-0.0.1-SNAPSHOT.jar'
+
+  - stage: SAST
+    displayName: Static Analysis Stage
+    dependsOn: Build
+    jobs:
+      - template: templates/sast.yml
+
+  - stage: Release
+    displayName: Release Stage
+    dependsOn: SAST
+    jobs:
+      - template: templates/release.yml
+        parameters:
+          jarName: 'demo-0.0.1-SNAPSHOT.jar'
