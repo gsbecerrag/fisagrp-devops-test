@@ -12,9 +12,7 @@ jobs:
             --platform ${{ parameters.platform }} \
             -v $(pwd)/app:/app \
             ${{ parameters.dockerImage }} \
-            /bin/bash -c "apt-get update && apt-get install -y maven && \
-            cd /app && \
-            mvn spotbugs:check checkstyle:check pmd:check"
+            /bin/bash -c "cd /app && ./mvnw spotbugs:check checkstyle:check pmd:check"
         displayName: 'Run Static Analysis'
         continueOnError: true
       
