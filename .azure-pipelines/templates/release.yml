@@ -5,8 +5,6 @@ parameters:
 jobs:
   - job: Release
     displayName: Publish Artifact
-    pool:
-      vmImage: 'ubuntu-latest'
     steps:
       - script: |
           mkdir -p $(Build.ArtifactStagingDirectory)
